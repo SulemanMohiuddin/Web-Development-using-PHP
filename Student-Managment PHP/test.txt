@@ -1,0 +1,73 @@
+<?php
+// Start or resume a session
+session_start();
+
+// Check if user is logged in and has a valid session
+if (!isset($_SESSION['username']) || empty($_SESSION['username'])) {
+    // Redirect to the login page if not logged in
+    header("Location: login.php");
+    exit();
+}
+
+// Include the database connection file
+include 'connection.php';
+
+// Function to check if the session is expired
+function isSessionExpired() {
+    $session_expiration = 300; // 5 minutes in seconds
+    $current_time = time();
+    if (isset($_SESSION['last_activity']) && ($current_time - $_SESSION['last_activity']) > $session_expiration) {
+        // Session expired, destroy the session and return true
+        session_unset();
+        session_destroy();
+        return true;
+    } else {
+        // Update last activity time
+        $_SESSION['last_activity'] = $current_time;
+        return false;
+    }
+}
+
+// Check if the session is expired
+    // Check if the user is logged in
+    if (!isset($_SESSION['username']) || empty($_SESSION['username'])) {
+        // Redirect to the login page if not logged in
+        header("Location: login.php");
+        exit();
+    }
+
+// Retrieve user's role from session
+$user_role = $_SESSION['role'];
+$user_profile_pic = $_SESSION['profile_pic'];
+
+// Display different content based on the user's role
+switch ($user_role) {
+    case 'student':
+        // Include student-specific content
+        include 'student.php';
+        break;
+    case 'faculty':
+        // Include faculty-specific content
+        include 'faculty.php';
+        break;
+    case 'admin':
+        // Include admin-specific content
+        include 'admin.php';
+        break;
+    default:
+        echo "Unknown role.";
+}
+?>
+<body>
+    <?php
+
+    // Display the username and role
+    echo '<img src="' . $user_profile_pic . '" alt="Profile Picture"><br>';
+    echo "Welcome, " . $_SESSION['username'] . "!<br>";
+    echo "Role: " . $_SESSION['role'] . "<br>";
+
+    // Display a logout link
+    echo '<a href="logout.php">Logout</a>';
+    ?>
+</body>
+</html>
